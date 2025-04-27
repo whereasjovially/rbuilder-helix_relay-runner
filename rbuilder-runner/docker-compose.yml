@@ -1,7 +1,8 @@
 services:
+  
   reth-builder:
     container_name: rbuilder-reth
-    image: whereasjovially/rbuilder:constraints
+    image: whereasjovially/rbuilder:vanila
     entrypoint: ["/app/rbuilder"]
     command:
       - node
@@ -43,7 +44,49 @@ services:
       - "32806:8645"
       - "32807:9001"
     environment:
-      - CL_ENDPOINT=http://49.13.144.62:5052
+      - CL_ENDPOINT=http://49.13.144.62:4000
       - SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
       - GOPROXY=https://goproxy.primary.production.platform.ethpandaops.io
     init: true
+
+  consensus:
+    image: sigp/lighthouse:latest
+    container_name: consensus-lighthouse
+    command:
+      - lighthouse
+      - beacon_node
+      - --network=hoodi
+      - --debug-level=info
+      - --datadir=/var/lib/lighthouse
+      - --disable-enr-auto-update
+      - --enr-address=49.13.144.62
+      - --enr-udp-port=50050
+      - --enr-tcp-port=50050
+      - --listen-address=0.0.0.0
+      - --http
+      - --http-address=0.0.0.0
+      - --http-port=4000
+      - --always-prepare-payload
+      - --prepare-payload-lookahead=12000
+      - --slots-per-restore-point=32
+      - --disable-packet-filter
+      - --checkpoint-sync-url=https://hoodi.beaconstate.info
+      - --execution-endpoint=http://rbuilder-reth:8551
+      - --suggested-fee-recipient=0xeb18db11dc5080012e1992E823190b641CB695C4
+      - --subscribe-all-subnets
+      - --metrics
+      - --metrics-address=0.0.0.0
+      - --metrics-allow-origin=*
+      - --metrics-port=5054
+      - --enable-private-discovery
+      - --jwt-secrets=/jwt/jwtsecret
+    ports:
+      - "50050:50050/tcp"
+      - "50050:50050/udp"
+      - "4000:4000"
+      - "5054:5054"
+    volumes:
+      - ./jwt:/jwt
+    restart: unless-stopped
+    depends_on:
+      - reth-builder
