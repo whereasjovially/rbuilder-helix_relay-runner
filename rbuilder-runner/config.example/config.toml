@@ -1,0 +1,62 @@
+log_json = true
+log_level = "info,rbuilder=debug"
+redacted_telemetry_server_port = 6061
+redacted_telemetry_server_ip = "0.0.0.0"
+full_telemetry_server_port = 6060
+full_telemetry_server_ip = "0.0.0.0"
+
+chain = "hoodi"
+reth_datadir = "/data/reth/execution-data"
+
+coinbase_secret_key = "607a11b45a7219cc61a3d9c5fd08c7eebd602a6a19a977f8d3771d5711a550f2"
+relay_secret_key = "607a11b45a7219cc61a3d9c5fd08c7eebd602a6a19a977f8d3771d5711a550f2"
+optimistic_relay_secret_key = "607a11b45a7219cc61a3d9c5fd08c7eebd602a6a19a977f8d3771d5711a550f2"
+
+# cl_node_url can be a single value, array of values, or passed by an environment variables with values separated with a comma
+cl_node_url = ["http://hoodi-geth-lighthouse-beacon-headless:5052"]
+jsonrpc_server_port = 8645
+jsonrpc_server_ip = "0.0.0.0"
+el_node_ipc_path = "/tmp/reth.ipc"
+extra_data = "🐼⚡🤖"
+genesis_fork_version = "0x10000038"
+
+ignore_cancellable_orders = true
+
+sbundle_mergeable_signers = []
+live_builders = ["mp-ordering", "mgp-ordering"]
+
+enabled_relays = ["flashbots"]
+
+root_hash_use_sparse_trie=true
+root_hash_compare_sparse_trie=false
+
+
+[[relays]]
+name = "flashbots"
+url = "http://0xa55c1285d84ba83a5ad26420cd5ad3091e49c55a813eee651cd467db38a8c8e63192f47955e9376f6b42f6d190571cb5@49.13.144.62:4040"
+priority = 0
+use_ssz_for_submit = false
+use_gzip_for_submit = false
+
+
+[[builders]]
+name = "mgp-ordering"
+algo = "ordering-builder"
+discard_txs = true
+sorting = "mev-gas-price"
+failed_order_retries = 1
+drop_failed_orders = true
+
+[[builders]]
+name = "mp-ordering"
+algo = "ordering-builder"
+discard_txs = true
+sorting = "max-profit"
+failed_order_retries = 1
+drop_failed_orders = true
+
+[[builders]]
+name = "parallel"
+algo = "parallel-builder"
+discard_txs = true
+num_threads = 25

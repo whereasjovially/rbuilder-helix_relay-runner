@@ -1,0 +1,49 @@
+services:
+  reth-builder:
+    container_name: rbuilder-reth
+    image: whereasjovially/rbuilder:constraints
+    entrypoint: ["/app/rbuilder"]
+    command:
+      - node
+      - -vvv
+      - --datadir=/data/reth/execution-data
+      - --chain=hoodi
+      - --http
+      - --http.port=8545
+      - --http.addr=0.0.0.0
+      - --http.corsdomain=*
+      - --http.api=admin,net,eth,web3,debug,txpool,trace,flashbots
+      - --ws
+      - --ws.addr=0.0.0.0
+      - --ws.port=8546
+      - --ws.api=net,eth
+      - --ws.origins=*
+      - --nat=extip:172.16.0.12
+      - --authrpc.port=8551
+      - --authrpc.jwtsecret=/jwt/jwtsecret
+      - --authrpc.addr=0.0.0.0
+      - --metrics=0.0.0.0:9001
+      - --discovery.port=30303
+      - --port=30303
+      - --bootnodes=enode://2112dd3839dd752813d4df7f40936f06829fc54c0e051a93967c26e5f5d27d99d886b57b4ffcc3c475e930ec9e79c56ef1dbb7d86ca5ee83a9d2ccf36e5c240c@134.209.138.84:30303,enode://60203fcb3524e07c5df60a14ae1c9c5b24023ea5d47463dfae051d2c9f3219f309657537576090ca0ae641f73d419f53d8e8000d7a464319d4784acd7d2abc41@209.38.124.160:30303,enode://8ae4a48101b2299597341263da0deb47cc38aa4d3ef4b7430b897d49bfa10eb1ccfe1655679b1ed46928ef177fbf21b86837bd724400196c508427a6f41602cd@134.199.184.23:30303
+      - --rbuilder.config=/config/config.toml
+      - --engine.persistence-threshold=0
+      - --engine.memory-block-buffer-target=0
+      - --txpool.no-local-transactions-propagation
+    volumes:
+      - ./config:/config
+      - ./jwt:/jwt
+    ports:
+      - "32808:30303/tcp"
+      - "32773:30303/udp"
+      - "32802:6060"
+      - "32803:8545"
+      - "32804:8546"
+      - "32805:8551"
+      - "32806:8645"
+      - "32807:9001"
+    environment:
+      - CL_ENDPOINT=http://49.13.144.62:5052
+      - SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+      - GOPROXY=https://goproxy.primary.production.platform.ethpandaops.io
+    init: true
