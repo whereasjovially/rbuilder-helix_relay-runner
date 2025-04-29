@@ -23,7 +23,7 @@ services:
       - "32790:6379"
 
   helix:
-    image: ghcr.io/gattaca-com/helix:develop
+    image: whereasjovially/helix:e43e66
     container_name: helix
     volumes:
       - ./config.yml:/app/config.yml

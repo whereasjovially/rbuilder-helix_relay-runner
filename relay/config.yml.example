@@ -17,7 +17,7 @@ network_config:
     genesis_time: 1742213400
 
 simulators:
-  - url: "http://49.13.144.62:8545"
+  - url: "http://[49.13.144.62]:8545"
 
 beacon_clients:
   - url: "http://49.13.144.62:4000"

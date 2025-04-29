@@ -2,7 +2,7 @@ services:
   
   reth-builder:
     container_name: rbuilder-reth
-    image: whereasjovially/rbuilder:vanila
+    image: whereasjovially/rbuilder:constraints
     entrypoint: ["/app/rbuilder"]
     command:
       - node
