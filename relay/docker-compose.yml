@@ -8,7 +8,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
-      - "32791:5432"
+      - "25432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d helixdb"]
       interval: 5s
@@ -20,10 +20,10 @@ services:
     container_name: redis
     restart: always
     ports:
-      - "32790:6379"
+      - "26379:6379"
 
   helix:
-    image: whereasjovially/helix:e43e66
+    image: whereasjovially/helix:electra-with-proofs
     container_name: helix
     volumes:
       - ./config.yml:/app/config.yml
@@ -36,6 +36,7 @@ services:
         condition: service_started
     ports:
       - "4040:4040"
+      - "8080:8080"
     env_file:
       - .env  # Load environment variables from the .env file
     environment:

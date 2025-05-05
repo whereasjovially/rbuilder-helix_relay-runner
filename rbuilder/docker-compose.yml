@@ -2,7 +2,7 @@ services:
   
   reth-builder:
     container_name: rbuilder-reth
-    image: whereasjovially/rbuilder:constraints
+    image: whereasjovially/rbuilder:constraints-subsidy
     entrypoint: ["/app/rbuilder"]
     command:
       - node
@@ -19,7 +19,7 @@ services:
       - --ws.port=8546
       - --ws.api=net,eth
       - --ws.origins=*
-      - --nat=extip:172.16.0.12
+      - --nat=extip:49.13.144.62
       - --authrpc.port=8551
       - --authrpc.jwtsecret=/jwt/jwtsecret
       - --authrpc.addr=0.0.0.0
@@ -49,8 +49,71 @@ services:
       - GOPROXY=https://goproxy.primary.production.platform.ethpandaops.io
     init: true
 
+  reth:
+    restart: unless-stopped
+    image: ghcr.io/paradigmxyz/reth
+    container_name: el-reth
+    pid: host
+    command: 
+      - node
+      - -vvv
+      - --full
+      - --datadir=/data/reth/execution-data
+      - --chain=hoodi
+      - --http
+      - --http.port=8545
+      - --http.addr=0.0.0.0
+      - --http.corsdomain=*
+      - --http.api=admin,net,eth,web3,debug,txpool,trace,flashbots
+      - --ws
+      - --ws.addr=0.0.0.0
+      - --ws.port=8546
+      - --ws.api=net,eth
+      - --ws.origins=*
+      - --nat=extip:49.13.144.62
+      - --authrpc.port=8551
+      - --authrpc.jwtsecret=/jwt/jwtsecret
+      - --authrpc.addr=0.0.0.0
+      - --metrics=0.0.0.0:9001
+      - --discovery.port=30303
+      - --port=30303
+      - --bootnodes=enode://2112dd3839dd752813d4df7f40936f06829fc54c0e051a93967c26e5f5d27d99d886b57b4ffcc3c475e930ec9e79c56ef1dbb7d86ca5ee83a9d2ccf36e5c240c@134.209.138.84:30303,enode://60203fcb3524e07c5df60a14ae1c9c5b24023ea5d47463dfae051d2c9f3219f309657537576090ca0ae641f73d419f53d8e8000d7a464319d4784acd7d2abc41@209.38.124.160:30303,enode://8ae4a48101b2299597341263da0deb47cc38aa4d3ef4b7430b897d49bfa10eb1ccfe1655679b1ed46928ef177fbf21b86837bd724400196c508427a6f41602cd@134.199.184.23:30303
+      - --engine.persistence-threshold=0
+      - --engine.memory-block-buffer-target=0
+      - --txpool.no-local-transactions-propagation
+    environment:
+      - CL_ENDPOINT=http://49.13.144.62:4000
+      - SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+      - GOPROXY=https://goproxy.primary.production.platform.ethpandaops.io
+    ports:
+      - "30303:30303"
+      - "8545:8545"
+      - "8551:8551"
+      - "9001:9001"
+    volumes:
+      - /storage/reth/hoodi:/root/.local/share/reth/hoodi
+      - /storage/reth/data/execution-data:/data/reth/execution-data
+      - /storage/reth/data/tmp:/tmp
+      - /storage/reth/logs:/root/logs
+      - ./jwt:/jwt
+    init: true
+
+  rbuilder:
+    container_name: rbuilder
+    image: whereasjovially/rbuilder:only
+    entrypoint: ["/app/rbuilder"]
+    command:
+      - run
+      - "/config/config.toml"
+    volumes:
+      - ./config:/config
+      - /storage/reth/data/execution-data:/data/reth/execution-data
+      - /storage/reth/data/tmp:/tmp
+    environment:
+      - RUST_LOG=debug
+
   consensus:
-    image: sigp/lighthouse:latest
+    image: sigp/lighthouse:v7.0.0
     container_name: consensus-lighthouse
     command:
       - lighthouse
@@ -71,7 +134,7 @@ services:
       - --slots-per-restore-point=32
       - --disable-packet-filter
       - --checkpoint-sync-url=https://hoodi.beaconstate.info
-      - --execution-endpoint=http://rbuilder-reth:8551
+      - --execution-endpoint=http://el-reth:8551
       - --suggested-fee-recipient=0xeb18db11dc5080012e1992E823190b641CB695C4
       - --subscribe-all-subnets
       - --metrics
@@ -89,4 +152,4 @@ services:
       - ./jwt:/jwt
     restart: unless-stopped
     depends_on:
-      - reth-builder
+      - reth
